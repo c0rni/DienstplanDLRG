@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -124,6 +125,11 @@ class UserController extends Controller
                 ->groupBy('qualifications.id')
                 ->pluck('sum_points', 'id')->toArray();
             $debug[$year] = [$from, $to, [$qualfication_credits[$year] ]];
+        }
+
+        if (Auth::id() == $id && !$user->ical_token) {
+            $user->ical_token = Str::uuid();
+            $user->save();
         }
 
         return view('user.profile', compact('qualfication_credits', 'all_qualfications_where_trainings_exsist_and_user_has', 'years'))->with('user', $user);

@@ -25,6 +25,8 @@ Route::get('/order', 'OrderController@index');
 Route::get('/order/create/{package}', 'OrderController@create');
 Route::post('/order/{package}', 'OrderController@store');
 
+Route::get('/ical/{token}', 'ICalController@feed')->name('ical.feed');
+
 Route::group(['middleware' => ['auth', 'EnsureClientAssigned', 'web', 'SurveyHandler']], function () {
 
     Route::redirect('/', '/service');
