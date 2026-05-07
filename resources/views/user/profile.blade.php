@@ -36,22 +36,35 @@
                     <h2>Kalender abonnieren</h2>
                 </div>
                 <div class="body">
-                    <p>Kopiere diese URL in deine Kalender-App (Apple Kalender, Google Calendar, Outlook …), um deine Dienste und Übungen zu abonnieren.</p>
-                    <p class="text-muted" style="font-size: 0.9em;">
-                        Enthält alle Dienste und Übungen, zu denen du eingetragen bist. Bewerbungen, bei denen du noch nicht eingeteilt wurdest, erscheinen mit dem Zusatz <em>(Beworben)</em> im Titel.
-                    </p>
-                    <div class="input-group">
-                        <input type="text" id="ical-url" class="form-control" readonly
-                               value="{{ route('ical.feed', $user->ical_token) }}">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default waves-effect" type="button" onclick="copyIcalUrl()">
+                    <p>Was soll im iCal-Kalenderabo enthalten sein?</p>
+                    <div style="margin-bottom: 16px;">
+                        <div class="checkbox" style="display: inline-block; margin-right: 24px;">
+                            <input type="checkbox" id="toggle-services" class="filled-in chk-col-red" checked onchange="ensureOneChecked('toggle-trainings', this)">
+                            <label for="toggle-services">Dienste</label>
+                        </div>
+                        <div class="checkbox" style="display: inline-block;">
+                            <input type="checkbox" id="toggle-trainings" class="filled-in chk-col-red" checked onchange="ensureOneChecked('toggle-services', this)">
+                            <label for="toggle-trainings">Übungen</label>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger waves-effect" type="button" onclick="generateIcalUrl()">
+                        <i class="material-icons">link</i> Link generieren
+                    </button>
+
+                    <div id="ical-result" style="display: none; margin-top: 16px;">
+                        <p class="text-muted" style="font-size: 0.9em;">
+                            Kopiere diese URL in deine Kalender-App. Bewerbungen erscheinen mit dem Zusatz <em>(Beworben)</em> im Titel.
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="text" id="ical-url" class="form-control" readonly style="flex: 1;">
+                            <button class="btn btn-default waves-effect" type="button" onclick="copyIcalUrl()" title="Kopieren" style="white-space: nowrap; flex-shrink: 0;">
                                 <i class="material-icons">content_copy</i> Kopieren
                             </button>
+                        </div>
+                        <span id="ical-copy-feedback" style="display:none; color: green; font-size: 0.85em; margin-top: 4px;">
+                            <i class="material-icons" style="font-size:1em; vertical-align: middle;">check</i> URL kopiert!
                         </span>
                     </div>
-                    <span id="ical-copy-feedback" style="display:none; color: green; font-size: 0.85em; margin-top: 4px;">
-                        <i class="material-icons" style="font-size:1em; vertical-align: middle;">check</i> URL kopiert!
-                    </span>
                 </div>
             </div>
         </div>
@@ -63,9 +76,20 @@
 @section('post_body')
 
     <script>
-        $( document ).ready(function() {
+        function ensureOneChecked(otherId, changed) {
+            if (!changed.checked && !document.getElementById(otherId).checked) {
+                document.getElementById(otherId).checked = true;
+            }
+        }
 
-        });
+        function generateIcalUrl() {
+            var services  = document.getElementById('toggle-services').checked  ? 'true' : 'false';
+            var trainings = document.getElementById('toggle-trainings').checked ? 'true' : 'false';
+            var base = '{{ route("ical.feed", $user->ical_token) }}';
+            var url = base + '?services=' + services + '&trainings=' + trainings;
+            document.getElementById('ical-url').value = url;
+            document.getElementById('ical-result').style.display = 'block';
+        }
 
         function copyIcalUrl() {
             var url = document.getElementById('ical-url').value;

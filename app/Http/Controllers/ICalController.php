@@ -22,62 +22,65 @@ class ICalController extends Controller
     {
         $user = User::where('ical_token', $token)->firstOrFail();
 
+        $includeServices  = request('services', 'true') === 'true';
+        $includeTrainings = request('trainings', 'true') === 'true';
+
         $events = [];
 
-        // Bestätigte Wachdienste
-        $servicePositions = Position::with(['service', 'qualification'])
-            ->where('user_id', $user->id)
-            ->whereNotNull('service_id')
-            ->whereHas('service')
-            ->get();
+        if ($includeServices) {
+            $servicePositions = Position::with(['service', 'qualification'])
+                ->where('user_id', $user->id)
+                ->whereNotNull('service_id')
+                ->whereHas('service')
+                ->get();
 
-        foreach ($servicePositions as $position) {
-            $service = $position->service;
-            $prefix = 'Dienst' . ($position->qualification ? ' (' . $position->qualification->name . ')' : '');
-            $title = $this->serviceTitle($prefix, $service->date, $service->dateEnd ?? null, $service->comment ?? null);
-            $event = $this->buildEvent($title, $service->date, $service->dateEnd ?? null, $service->location ?? null, $service->comment ?? null);
-            $event->setStatus(EventStatus::CONFIRMED());
-            $events[] = $event;
-        }
-
-        // Tentative Wachdienste (beworben, noch nicht zugewiesen)
-        $candidatures = PositionCandidature::with(['position.service', 'position.qualification'])
-            ->where('user_id', $user->id)
-            ->whereHas('position.service')
-            ->get();
-
-        $confirmedServiceIds = $servicePositions->pluck('service_id')->filter()->unique();
-
-        foreach ($candidatures as $candidature) {
-            $position = $candidature->position;
-            $service = $position->service;
-
-            if ($confirmedServiceIds->contains($service->id)) {
-                continue;
+            foreach ($servicePositions as $position) {
+                $service = $position->service;
+                $prefix = 'Dienst' . ($position->qualification ? ' (' . $position->qualification->name . ')' : '');
+                $title = $this->serviceTitle($prefix, $service->date, $service->dateEnd ?? null, $service->comment ?? null);
+                $event = $this->buildEvent($title, $service->date, $service->dateEnd ?? null, $service->location ?? null, $service->comment ?? null);
+                $event->setStatus(EventStatus::CONFIRMED());
+                $events[] = $event;
             }
 
-            $prefix = 'Dienst (Beworben)' . ($position->qualification ? ' (' . $position->qualification->name . ')' : '');
-            $title = $this->serviceTitle($prefix, $service->date, $service->dateEnd ?? null, $service->comment ?? null);
+            $candidatures = PositionCandidature::with(['position.service', 'position.qualification'])
+                ->where('user_id', $user->id)
+                ->whereHas('position.service')
+                ->get();
 
-            $event = $this->buildEvent($title, $service->date, $service->dateEnd ?? null, $service->location ?? null, $service->comment ?? null);
-            $event->setStatus(EventStatus::TENTATIVE());
-            $events[] = $event;
+            $confirmedServiceIds = $servicePositions->pluck('service_id')->filter()->unique();
+
+            foreach ($candidatures as $candidature) {
+                $position = $candidature->position;
+                $service = $position->service;
+
+                if ($confirmedServiceIds->contains($service->id)) {
+                    continue;
+                }
+
+                $prefix = 'Dienst (Beworben)' . ($position->qualification ? ' (' . $position->qualification->name . ')' : '');
+                $title = $this->serviceTitle($prefix, $service->date, $service->dateEnd ?? null, $service->comment ?? null);
+                $event = $this->buildEvent($title, $service->date, $service->dateEnd ?? null, $service->location ?? null, $service->comment ?? null);
+                $event->setStatus(EventStatus::TENTATIVE());
+                $events[] = $event;
+            }
         }
 
-        // Bestätigte Übungen (via training_users)
-        $trainingUsers = Training_user::with(['training', 'position.qualification'])
-            ->where('user_id', $user->id)
-            ->whereHas('training')
-            ->get();
+        if ($includeTrainings) {
+            $trainingUsers = Training_user::with(['training', 'position.qualification'])
+                ->where('user_id', $user->id)
+                ->whereHas('training')
+                ->get();
 
-        foreach ($trainingUsers as $trainingUser) {
-            $training = $trainingUser->training;
-            $qualification = $trainingUser->position->qualification ?? null;
-            $prefix = ($training->title ?? 'Übung') . ($qualification ? ' (' . $qualification->name . ')' : '');
-            $title = $this->serviceTitle($prefix, $training->date, $training->dateEnd ?? null, $training->content ?? null);
-            $event = $this->buildEvent($title, $training->date, $training->dateEnd ?? null, $training->location ?? null, $training->content ?? null);
-            $event->setStatus(EventStatus::CONFIRMED());
-            $events[] = $event;
+            foreach ($trainingUsers as $trainingUser) {
+                $training = $trainingUser->training;
+                $qualification = $trainingUser->position->qualification ?? null;
+                $prefix = ($training->title ?? 'Übung') . ($qualification ? ' (' . $qualification->name . ')' : '');
+                $title = $this->serviceTitle($prefix, $training->date, $training->dateEnd ?? null, $training->content ?? null);
+                $event = $this->buildEvent($title, $training->date, $training->dateEnd ?? null, $training->location ?? null, $training->content ?? null);
+                $event->setStatus(EventStatus::CONFIRMED());
+                $events[] = $event;
+            }
         }
 
         $calendar = new Calendar($events);
