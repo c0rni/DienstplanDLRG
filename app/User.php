@@ -8,11 +8,23 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
     use Notifiable;
     use HasFactory;
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (empty($user->ical_token)) {
+                $user->ical_token = Str::uuid();
+            }
+        });
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -20,7 +32,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'first_name', 'email', 'approved', 'role', 'password', 'mobilenumber', 'currentclient_id', 'ical_token'
+        'name', 'first_name', 'email', 'approved', 'role', 'password', 'mobilenumber', 'currentclient_id'
     ];
 
     /**

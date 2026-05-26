@@ -51,6 +51,10 @@
                         <i class="material-icons">link</i> Link generieren
                     </button>
 
+                    <button class="btn btn-default waves-effect" type="button" style="margin-left: 8px;" data-toggle="modal" data-target="#revokeIcalModal">
+                        <i class="material-icons">refresh</i> Link zurücksetzen
+                    </button>
+
                     <div id="ical-result" style="display: none; margin-top: 16px;">
                         <p class="text-muted" style="font-size: 0.9em;">
                             Kopiere diese URL in deine Kalender-App. Bewerbungen erscheinen mit dem Zusatz <em>(Beworben)</em> im Titel.
@@ -70,6 +74,29 @@
         </div>
         @endif
     </div>
+
+    @if(Auth::id() == $user->id)
+    <div class="modal fade" id="revokeIcalModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Kalender-Link zurücksetzen?</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Der aktuelle Link wird <strong>sofort ungültig</strong>. Alle Kalender-Apps, die diesen Link abonniert haben, erhalten keine Updates mehr.</p>
+                    <p class="text-muted" style="font-size: 0.9em;">Du bekommst danach einen neuen Link, den du neu abonnieren musst.</p>
+                </div>
+                <div class="modal-footer">
+                    <form method="POST" action="{{ route('user.revokeIcalToken', $user->id) }}">
+                        @csrf
+                        <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Abbrechen</button>
+                        <button type="submit" class="btn btn-danger waves-effect">Zurücksetzen</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 @endsection
 
 

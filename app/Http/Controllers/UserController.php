@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -127,11 +126,6 @@ class UserController extends Controller
             $debug[$year] = [$from, $to, [$qualfication_credits[$year] ]];
         }
 
-        if (Auth::id() == $id && !$user->ical_token) {
-            $user->ical_token = Str::uuid();
-            $user->save();
-        }
-
         return view('user.profile', compact('qualfication_credits', 'all_qualfications_where_trainings_exsist_and_user_has', 'years'))->with('user', $user);
     }
 
@@ -173,7 +167,7 @@ class UserController extends Controller
         if (Auth::user()->isSuperAdmin() && Auth::user()->id != $id)
         {
             $user = User::findorFail($id);
-            $user->fill($request->except(['id', '_token']));
+            $user->fill($request->except(['id', '_token', 'ical_token']));
             $user->save();
 
             return redirect(action('UserController@index'));
@@ -181,7 +175,7 @@ class UserController extends Controller
         else if (Auth::user()->isAdmin() && Auth::user()->id != $id)
         {
             $user = User::findorFail($id);
-            $user->fill($request->except(['id', '_token', 'approved', 'role']));
+            $user->fill($request->except(['id', '_token', 'approved', 'role', 'ical_token']));
             $user->save();
 
             return redirect(action('UserController@index'));
@@ -189,7 +183,7 @@ class UserController extends Controller
         else
         {
             $user = Auth::user();
-            $user->fill($request->except(['id', '_token', 'approved', 'role']));
+            $user->fill($request->except(['id', '_token', 'approved', 'role', 'ical_token']));
             $user->save();
 
             return redirect(action('HomeController@index'));
@@ -253,5 +247,18 @@ class UserController extends Controller
 
         $client = Client::find($id);
         return redirect()->back()->with(['errormessage' => 'Dein User ist für ' . empty($client) ? "" : $client->name . ' noch nicht freigegeben']);
+    }
+
+    public function revokeIcalToken($id)
+    {
+        if (Auth::id() != $id) {
+            abort(403);
+        }
+
+        $user = Auth::user();
+        $user->ical_token = \Illuminate\Support\Str::uuid();
+        $user->save();
+
+        return redirect()->route('user.show', $id)->with('successmessage', 'Kalender-Link wurde zurückgesetzt. Bitte abonniere den Kalender mit dem neuen Link.');
     }
 }
