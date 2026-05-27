@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('ical_token', 64)->nullable()->unique()->after('currentclient_id');
+            $table->uuid('ical_token')->nullable()->unique()->after('currentclient_id');
         });
     }
 
