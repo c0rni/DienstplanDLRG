@@ -1,7 +1,7 @@
 {
-    "name": "DLRG Dienstplan",
+    "name": "Dienstplan",
     "short_name": "Dienstplan",
-    "description": "Dienstplanverwaltung für DLRG-Gliederungen",
+    "description": "Dienstplanverwaltung",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",
