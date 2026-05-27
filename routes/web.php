@@ -45,6 +45,7 @@ Route::group(['middleware' => ['auth', 'EnsureClientAssigned', 'web', 'SurveyHan
 
     Route::resource('user', 'UserController');
     Route::match(['get', 'post'], 'user/approve/{id}', 'UserController@approve_user');
+    Route::post('user/{id}/revoke-ical-token', 'UserController@revokeIcalToken')->name('user.revokeIcalToken');
 
     Route::resource('client', 'ClientController');
     Route::get('/clientapply', 'ClientController@apply')->name('clientapply');
