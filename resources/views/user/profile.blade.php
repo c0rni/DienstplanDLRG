@@ -53,7 +53,7 @@
 
                     <div id="ical-result" style="display: none; margin-top: 16px;">
                         <p class="text-muted" style="font-size: 0.9em;">
-                            Kopiere diese URL in deine Kalender-App. Bewerbungen erscheinen mit dem Zusatz <em>(Beworben)</em> im Titel.
+                            Kopiere diese URL in deine Kalender-App. Meldungen für Dienste erscheinen mit dem Zusatz <em>(nicht bestätigt)</em> im Titel.
                         </p>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <input type="text" id="ical-url" class="form-control" readonly style="flex: 1;">
