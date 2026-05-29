@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_VERSION = 'v1';
-const CACHE_NAME = `dlrg-dienstplan-${CACHE_VERSION}`;
+const CACHE_NAME = `dienstplan-${CACHE_VERSION}`;
 
 const PRECACHE_ASSETS = [
     '/css/style.css',
@@ -23,7 +23,7 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((cacheNames) =>
             Promise.all(
                 cacheNames
-                    .filter((name) => name.startsWith('dlrg-dienstplan-') && name !== CACHE_NAME)
+                    .filter((name) => name.startsWith('dienstplan-') && name !== CACHE_NAME)
                     .map((name) => caches.delete(name))
             )
         )

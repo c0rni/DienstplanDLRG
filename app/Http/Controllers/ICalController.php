@@ -58,7 +58,7 @@ class ICalController extends Controller
                     continue;
                 }
 
-                $prefix = 'Dienst (Beworben)' . ($position->qualification ? ' (' . $position->qualification->name . ')' : '');
+                $prefix = 'Dienst (nicht bestätigt)' . ($position->qualification ? ' (' . $position->qualification->name . ')' : '');
                 $title = $this->serviceTitle($prefix, $service->date, $service->dateEnd ?? null, $service->comment ?? null);
                 $event = $this->buildEvent($title, $service->date, $service->dateEnd ?? null, $service->location ?? null, $service->comment ?? null);
                 $event->setStatus(EventStatus::TENTATIVE());
